@@ -4,6 +4,8 @@
   "description": "年賀状用にAIで作成した3DモデルをARで表示",
   "main": "src/index.html",
   "scripts": {
+    "start": "serve ./src/",
+    "https": "serve --ssl-cert ./localhttps_cert.pem --ssl-key ./localhttps_key.pem",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
