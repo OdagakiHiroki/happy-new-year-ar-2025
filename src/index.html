@@ -12,7 +12,7 @@
 </head>
 
 <body style="margin: 0; overflow: hidden;">
-  <a-scene renderer="logarithmicDepthBuffer: true;" embedded loading-screen="enabled: false;"
+  <a-scene id="scene" renderer="logarithmicDepthBuffer: true;" embedded loading-screen="enabled: false;"
     arjs="sourceType: webcam; debugUIEnabled: false;">
     <a-entity id="snakeLeft" gltf-model="https://odagakihiroki.github.io/models/3d/tiny-figurines/snake_cute.glb"
       scale="10 10 10"
@@ -24,7 +24,48 @@
       position="-8 9 -24"
       rotation="10 0 0"
     ></a-entity>
-    <a-text value="Happy\nNew\nYear!" color="red" position="0 16 0" scale="10 10 10" align="center"></a-text>
+    <a-entity class="firework" position="0 0 0">
+      <a-entity class="firework-tail-wrapper" position="0 14 0">
+        <a-cylinder
+          class="firework-tail"
+          color="yellow"
+          radius="0.05"
+          height="0.5"
+          position="0 0 0"
+          visible="true"
+          animation__move="property: position; to: 0 8 0; dur: 2000; easing: easeOutQuad; startEvents: startTail"
+          animation__scale="property: scale; to: 1 0.1 1; dur: 2000; easing: linear; startEvents: startTail"
+          >
+        </a-cylinder>
+      </a-entity>
+      <a-entity class="firework-particle-wrapper" position="0 22 0">
+        <a-circle class="particle" visible="false" color="#f09" radius="0.1" position="0 0 0" animation__move="property: position; to: 0 2 -5; dur: 1000; easing: easeOutQuad; startEvents: startExplosion"></a-circle>
+        <a-circle class="particle" visible="false" color="#f09" radius="0.1" position="0 0 0" animation__move="property: position; to: 0 1 -5; dur: 1000; easing: easeOutQuad; startEvents: startExplosion"></a-circle>
+        <a-circle class="particle" visible="false" color="#f04" radius="0.1" position="0 0 0" animation__move="property: position; to: 1 2 -5; dur: 1000; easing: easeOutQuad; startEvents: startExplosion"></a-circle>
+        <a-circle class="particle" visible="false" color="#f04" radius="0.1" position="0 0 0" animation__move="property: position; to: 0.5 1 -5; dur: 1000; easing: easeOutQuad; startEvents: startExplosion"></a-circle>
+        <a-circle class="particle" visible="false" color="#f90" radius="0.1" position="0 0 0" animation__move="property: position; to: 2 1 -5; dur: 1000; easing: easeOutQuad; startEvents: startExplosion"></a-circle>
+        <a-circle class="particle" visible="false" color="#f90" radius="0.1" position="0 0 0" animation__move="property: position; to: 1 0.5 -5; dur: 1000; easing: easeOutQuad; startEvents: startExplosion"></a-circle>
+        <a-circle class="particle" visible="false" color="#ff0" radius="0.1" position="0 0 0" animation__move="property: position; to: 2 0 -5; dur: 1000; easing: easeOutQuad; startEvents: startExplosion"></a-circle>
+        <a-circle class="particle" visible="false" color="#ff0" radius="0.1" position="0 0 0" animation__move="property: position; to: 1 0 -5; dur: 1000; easing: easeOutQuad; startEvents: startExplosion"></a-circle>
+        <a-circle class="particle" visible="false" color="#9f0" radius="0.1" position="0 0 0" animation__move="property: position; to: 2 -1 -5; dur: 1000; easing: easeOutQuad; startEvents: startExplosion"></a-circle>
+        <a-circle class="particle" visible="false" color="#9f0" radius="0.1" position="0 0 0" animation__move="property: position; to: 1 -0.5 -5; dur: 1000; easing: easeOutQuad; startEvents: startExplosion"></a-circle>
+        <a-circle class="particle" visible="false" color="#0f4" radius="0.1" position="0 0 0" animation__move="property: position; to: 1 -2 -5; dur: 1000; easing: easeOutQuad; startEvents: startExplosion"></a-circle>
+        <a-circle class="particle" visible="false" color="#0f4" radius="0.1" position="0 0 0" animation__move="property: position; to: 0.5 -1 -5; dur: 1000; easing: easeOutQuad; startEvents: startExplosion"></a-circle>
+        <a-circle class="particle" visible="false" color="#0f9" radius="0.1" position="0 0 0" animation__move="property: position; to: 0 -2 -5; dur: 1000; easing: easeOutQuad; startEvents: startExplosion"></a-circle>
+        <a-circle class="particle" visible="false" color="#0f9" radius="0.1" position="0 0 0" animation__move="property: position; to: 0 -1 -5; dur: 1000; easing: easeOutQuad; startEvents: startExplosion"></a-circle>
+        <a-circle class="particle" visible="false" color="#0fd" radius="0.1" position="0 0 0" animation__move="property: position; to: -1 -2 -5; dur: 1000; easing: easeOutQuad; startEvents: startExplosion"></a-circle>
+        <a-circle class="particle" visible="false" color="#0fd" radius="0.1" position="0 0 0" animation__move="property: position; to: -0.5 -1 -5; dur: 1000; easing: easeOutQuad; startEvents: startExplosion"></a-circle>
+        <a-circle class="particle" visible="false" color="#09f" radius="0.1" position="0 0 0" animation__move="property: position; to: -2 -1 -5; dur: 1000; easing: easeOutQuad; startEvents: startExplosion"></a-circle>
+        <a-circle class="particle" visible="false" color="#09f" radius="0.1" position="0 0 0" animation__move="property: position; to: -1 -0.5 -5; dur: 1000; easing: easeOutQuad; startEvents: startExplosion"></a-circle>
+        <a-circle class="particle" visible="false" color="#00f" radius="0.1" position="0 0 0" animation__move="property: position; to: -2 0 -5; dur: 1000; easing: easeOutQuad; startEvents: startExplosion"></a-circle>
+        <a-circle class="particle" visible="false" color="#00f" radius="0.1" position="0 0 0" animation__move="property: position; to: -1 0 -5; dur: 1000; easing: easeOutQuad; startEvents: startExplosion"></a-circle>
+        <a-circle class="particle" visible="false" color="#90f" radius="0.1" position="0 0 0" animation__move="property: position; to: -2 1 -5; dur: 1000; easing: easeOutQuad; startEvents: startExplosion"></a-circle>
+        <a-circle class="particle" visible="false" color="#90f" radius="0.1" position="0 0 0" animation__move="property: position; to: -1 0.5 -5; dur: 1000; easing: easeOutQuad; startEvents: startExplosion"></a-circle>
+        <a-circle class="particle" visible="false" color="#f0d" radius="0.1" position="0 0 0" animation__move="property: position; to: -1 2 -5; dur: 1000; easing: easeOutQuad; startEvents: startExplosion"></a-circle>
+        <a-circle class="particle" visible="false" color="#f0d" radius="0.1" position="0 0 0" animation__move="property: position; to: -0.5 1 -5; dur: 1000; easing: easeOutQuad; startEvents: startExplosion"></a-circle>
+      </a-entity>
+    </a-entity>
+    <a-text value="Happy\nNew\nYear!" color="#ff0000" position="0 16 0" scale="10 10 10" align="center" zOffset="100"></a-text>
     <a-entity id="snakeRight" gltf-model="https://odagakihiroki.github.io/models/3d/tiny-figurines/snake_cute.glb"
       scale="10 10 10"
       position="8 -2 -25"
@@ -37,6 +78,78 @@
     ></a-entity>
     <a-camera id="camera" rotation-reader position="0 30 30"></a-camera>
   </a-scene>
+
+  <script>
+    // preparation variables
+    const scene = document.querySelector("#scene");
+    const firework = document.querySelector(".firework");
+    const tail = firework.querySelector('.firework-tail');
+    const particles = firework.querySelectorAll('.particle');
+    const fireworkTemplate = firework.cloneNode(true);
+
+    // preparation functions
+    function addTailEvent(tail, particles) {
+      tail.addEventListener('animationcomplete__move', () => {
+        tail.setAttribute('visible', 'false');
+        for (let index = 0; index < particles.length; index++) {
+          particles[index].setAttribute('visible', 'true');
+          particles[index].emit('startExplosion')
+        }
+      });
+    }
+
+    function addParticlesEvent(firework, tail, particles) {
+      for (let index = 0; index < particles.length; index++) {
+        particles[index].addEventListener("animationcomplete__move", () => {
+          particles[index].remove();
+          if (index === particles.length - 1) {
+            firework.remove();
+            generateFirework(fireworkTemplate)
+          }
+        })
+      }
+    }
+
+    function generateFirework(fireworkTemplate) {
+      const fireworkClone = fireworkTemplate.cloneNode(true);
+      const positionX = Math.random() * 10 - 5;
+
+      fireworkClone.setAttribute("position", `${positionX} 0 0`)
+      const tailClone = fireworkClone.querySelector('.firework-tail');
+      const particlesClone = fireworkClone.querySelectorAll('.particle');
+      scene.appendChild(fireworkClone);
+      addTailEvent(tailClone, particlesClone);
+      addParticlesEvent(fireworkClone, tailClone, particlesClone)
+      setTimeout(() => {
+        tailClone.emit("startTail")
+      }, 0);
+    }
+
+    // set first position
+    const positionX = Math.random() * 10 - 5;
+    firework.setAttribute("position", `${positionX} 0 0`)
+
+    // execution
+    addTailEvent(tail, particles);
+    addParticlesEvent(firework, tail, particles)
+    tail.emit("startTail")
+
+    setTimeout(() => {
+      generateFirework(fireworkTemplate)
+    }, 500);
+
+    setTimeout(() => {
+      generateFirework(fireworkTemplate)
+    }, 1100);
+
+    setTimeout(() => {
+      generateFirework(fireworkTemplate)
+    }, 1800);
+
+    setTimeout(() => {
+      generateFirework(fireworkTemplate)
+    }, 2600);
+  </script>
 </body>
 
 </html>
