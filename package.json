@@ -1,0 +1,14 @@
+{
+  "name": "happy-new-year-ar-2025",
+  "version": "1.0.0",
+  "description": "年賀状用にAIで作成した3DモデルをARで表示",
+  "main": "src/index.html",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "serve": "^14.2.4"
+  }
+}
