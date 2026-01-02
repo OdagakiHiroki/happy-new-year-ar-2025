@@ -417,15 +417,17 @@
       }
     };
     
+    // ユーティリティ関数: ランダムな星評価を生成（1-5）
+    function generateStars() {
+      return Math.floor(Math.random() * FORTUNE_CONSTANTS.MAX_STARS) + FORTUNE_CONSTANTS.MIN_STARS;
+    }
+    
     // 運勢を生成する関数
     function generateFortune() {
       const levels = Object.keys(fortuneLevels);
       const selectedLevel = getRandomArrayElement(levels);
       const level = fortuneLevels[selectedLevel];
       const message = getRandomArrayElement(level.messages);
-      
-      // ランダムな星評価を生成（1-5）
-      const generateStars = () => Math.floor(Math.random() * FORTUNE_CONSTANTS.MAX_STARS) + FORTUNE_CONSTANTS.MIN_STARS;
       
       // ラッキーカラーの選択肢
       const colors = ['赤', '青', '黄', '緑', '紫', '橙', 'ピンク', '白', '金', '銀'];
@@ -449,15 +451,15 @@
     
     // 星を表示する関数
     function renderStars(count) {
-      return '★'.repeat(count) + '☆'.repeat(5 - count);
+      return '★'.repeat(count) + '☆'.repeat(FORTUNE_CONSTANTS.MAX_STARS - count);
     }
     
     // おみくじ結果を表示する関数
     function displayFortune(fortune) {
       const content = document.getElementById('fortune-content');
-      // XSS対策: 動的な値をHTMLエスケープ
+      // XSS対策: 動的な値をHTMLエスケープ（classNameは内部制御された値なので除外）
       content.innerHTML = `
-        <div class="fortune-level ${escapeHtml(fortune.className)}">${escapeHtml(fortune.level)}</div>
+        <div class="fortune-level ${fortune.className}">${escapeHtml(fortune.level)}</div>
         
         <div class="fortune-category">
           <div class="fortune-category-title">💕 恋愛運</div>
