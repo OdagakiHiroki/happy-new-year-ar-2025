@@ -139,12 +139,12 @@
   </style>
   
   <div id="omikuji-ui">
-    <button id="draw-button" class="omikuji-button">🎋 おみくじを引く</button>
+    <button id="draw-button" class="omikuji-button" aria-label="おみくじを引く">🎋 おみくじを引く</button>
   </div>
   
-  <div id="omikuji-result">
+  <div id="omikuji-result" role="dialog" aria-labelledby="fortune-content" aria-hidden="true">
     <div id="fortune-content"></div>
-    <button id="draw-again-button" class="omikuji-button">もう一度引く</button>
+    <button id="draw-again-button" class="omikuji-button" aria-label="もう一度おみくじを引く">もう一度引く</button>
   </div>
   
   <a-scene id="scene" renderer="logarithmicDepthBuffer: true;" embedded loading-screen="enabled: false;"
@@ -331,6 +331,34 @@
     // おみくじシステム (Omikuji System)
     // ========================================
     
+    // アニメーションタイミング定数
+    const ANIMATION_TIMING = {
+      TILT_DELAY: 1000,        // 筒が傾くまでの遅延
+      STICK_FLY_DELAY: 1000,   // 棒が飛び出すまでの遅延
+      PAPER_UNFOLD_DELAY: 2000,// 紙が展開されるまでの遅延
+      RESULT_DISPLAY_DELAY: 3500 // 結果が表示されるまでの遅延
+    };
+    
+    // 運勢の定数
+    const FORTUNE_CONSTANTS = {
+      MIN_STARS: 1,
+      MAX_STARS: 5,
+      MIN_LUCKY_NUMBER: 1,
+      MAX_LUCKY_NUMBER: 99
+    };
+    
+    // ユーティリティ関数: 配列からランダムに要素を選択
+    function getRandomArrayElement(array) {
+      return array[Math.floor(Math.random() * array.length)];
+    }
+    
+    // ユーティリティ関数: HTMLエスケープ（XSS対策）
+    function escapeHtml(text) {
+      const div = document.createElement('div');
+      div.textContent = text;
+      return div.innerHTML;
+    }
+    
     // おみくじのデータ定義
     const fortuneLevels = {
       daikichi: {
@@ -392,19 +420,19 @@
     // 運勢を生成する関数
     function generateFortune() {
       const levels = Object.keys(fortuneLevels);
-      const selectedLevel = levels[Math.floor(Math.random() * levels.length)];
+      const selectedLevel = getRandomArrayElement(levels);
       const level = fortuneLevels[selectedLevel];
-      const message = level.messages[Math.floor(Math.random() * level.messages.length)];
+      const message = getRandomArrayElement(level.messages);
       
       // ランダムな星評価を生成（1-5）
-      const generateStars = () => Math.floor(Math.random() * 5) + 1;
+      const generateStars = () => Math.floor(Math.random() * FORTUNE_CONSTANTS.MAX_STARS) + FORTUNE_CONSTANTS.MIN_STARS;
       
       // ラッキーカラーの選択肢
       const colors = ['赤', '青', '黄', '緑', '紫', '橙', 'ピンク', '白', '金', '銀'];
-      const luckyColor = colors[Math.floor(Math.random() * colors.length)];
+      const luckyColor = getRandomArrayElement(colors);
       
       // ラッキーナンバー（1-99）
-      const luckyNumber = Math.floor(Math.random() * 99) + 1;
+      const luckyNumber = Math.floor(Math.random() * FORTUNE_CONSTANTS.MAX_LUCKY_NUMBER) + FORTUNE_CONSTANTS.MIN_LUCKY_NUMBER;
       
       return {
         level: level.name,
@@ -427,8 +455,9 @@
     // おみくじ結果を表示する関数
     function displayFortune(fortune) {
       const content = document.getElementById('fortune-content');
+      // XSS対策: 動的な値をHTMLエスケープ
       content.innerHTML = `
-        <div class="fortune-level ${fortune.className}">${fortune.level}</div>
+        <div class="fortune-level ${escapeHtml(fortune.className)}">${escapeHtml(fortune.level)}</div>
         
         <div class="fortune-category">
           <div class="fortune-category-title">💕 恋愛運</div>
@@ -452,22 +481,23 @@
         
         <div class="fortune-category">
           <div class="fortune-category-title">🎨 ラッキーカラー</div>
-          <div style="font-size: 18px; color: #495057;">${fortune.luckyColor}</div>
+          <div style="font-size: 18px; color: #495057;">${escapeHtml(fortune.luckyColor)}</div>
         </div>
         
         <div class="fortune-category">
           <div class="fortune-category-title">🔢 ラッキーナンバー</div>
-          <div style="font-size: 24px; font-weight: bold; color: #495057;">${fortune.luckyNumber}</div>
+          <div style="font-size: 24px; font-weight: bold; color: #495057;">${escapeHtml(String(fortune.luckyNumber))}</div>
         </div>
         
         <div class="fortune-message">
           <strong>今年のメッセージ：</strong><br>
-          ${fortune.message}
+          ${escapeHtml(fortune.message)}
         </div>
       `;
       
       const resultPanel = document.getElementById('omikuji-result');
       resultPanel.classList.add('show');
+      resultPanel.setAttribute('aria-hidden', 'false');
     }
     
     // おみくじアニメーション
@@ -480,11 +510,11 @@
       cylinder.setAttribute('animation__tilt', {
         property: 'rotation',
         to: '0 0 -45',
-        dur: 1000,
+        dur: ANIMATION_TIMING.TILT_DELAY,
         easing: 'easeInOutQuad'
       });
       
-      // ステップ2: 棒が飛び出す（1秒後）
+      // ステップ2: 棒が飛び出す
       setTimeout(() => {
         stick.setAttribute('visible', 'true');
         stick.setAttribute('animation__fly', {
@@ -499,9 +529,9 @@
           dur: 800,
           easing: 'easeOutQuad'
         });
-      }, 1000);
+      }, ANIMATION_TIMING.STICK_FLY_DELAY);
       
-      // ステップ3: 紙が展開される（2秒後）
+      // ステップ3: 紙が展開される
       setTimeout(() => {
         paper.setAttribute('visible', 'true');
         paper.setAttribute('position', '0 -2 0');
@@ -518,13 +548,13 @@
           dur: 1000,
           easing: 'easeOutQuad'
         });
-      }, 2000);
+      }, ANIMATION_TIMING.PAPER_UNFOLD_DELAY);
       
-      // ステップ4: 結果を表示（3.5秒後）
+      // ステップ4: 結果を表示
       setTimeout(() => {
         const fortune = generateFortune();
         displayFortune(fortune);
-      }, 3500);
+      }, ANIMATION_TIMING.RESULT_DISPLAY_DELAY);
     }
     
     // アニメーションをリセット
@@ -550,6 +580,7 @@
       
       const resultPanel = document.getElementById('omikuji-result');
       resultPanel.classList.remove('show');
+      resultPanel.setAttribute('aria-hidden', 'true');
     }
     
     // イベントリスナー設定
@@ -560,10 +591,10 @@
       drawButton.disabled = true;
       animateOmikuji();
       
-      // アニメーション完了後にボタンを無効化したまま
+      // アニメーション完了後にボタンを非表示に
       setTimeout(() => {
         drawButton.style.display = 'none';
-      }, 3500);
+      }, ANIMATION_TIMING.RESULT_DISPLAY_DELAY);
     });
     
     drawAgainButton.addEventListener('click', () => {
