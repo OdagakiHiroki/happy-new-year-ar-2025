@@ -12,6 +12,141 @@
 </head>
 
 <body style="margin: 0; overflow: hidden;">
+  <!-- おみくじUIオーバーレイ -->
+  <style>
+    /* 基本スタイル */
+    #omikuji-ui {
+      position: fixed;
+      bottom: 20px;
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 1000;
+      font-family: 'Hiragino Sans', 'Meiryo', sans-serif;
+    }
+    
+    /* ボタンスタイル */
+    .omikuji-button {
+      background: linear-gradient(135deg, #ff6b6b 0%, #ee5a6f 100%);
+      color: white;
+      border: none;
+      padding: 15px 40px;
+      font-size: 18px;
+      font-weight: bold;
+      border-radius: 30px;
+      cursor: pointer;
+      box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
+      transition: all 0.3s ease;
+      touch-action: manipulation;
+    }
+    
+    .omikuji-button:active {
+      transform: scale(0.95);
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    }
+    
+    .omikuji-button:disabled {
+      background: #cccccc;
+      cursor: not-allowed;
+    }
+    
+    /* 結果パネル */
+    #omikuji-result {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: white;
+      border-radius: 20px;
+      padding: 30px;
+      max-width: 90vw;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+      z-index: 1001;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.5s ease;
+    }
+    
+    #omikuji-result.show {
+      display: block;
+      opacity: 1;
+    }
+    
+    .fortune-level {
+      font-size: 48px;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 20px;
+      text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .fortune-level.daikichi { color: #ff6b6b; }
+    .fortune-level.kichi { color: #ff8787; }
+    .fortune-level.chukichi { color: #ffa94d; }
+    .fortune-level.shokichi { color: #ffd43b; }
+    .fortune-level.suekichi { color: #74c0fc; }
+    .fortune-level.kyo { color: #a0a0a0; }
+    
+    .fortune-category {
+      margin: 15px 0;
+      padding: 15px;
+      background: #f8f9fa;
+      border-radius: 10px;
+    }
+    
+    .fortune-category-title {
+      font-weight: bold;
+      margin-bottom: 8px;
+      color: #495057;
+    }
+    
+    .stars {
+      color: #ffd43b;
+      font-size: 20px;
+      letter-spacing: 2px;
+    }
+    
+    .fortune-message {
+      margin: 20px 0;
+      padding: 20px;
+      background: #fff3bf;
+      border-left: 4px solid #ffd43b;
+      border-radius: 5px;
+      line-height: 1.8;
+    }
+    
+    #draw-again-button {
+      width: 100%;
+      margin-top: 20px;
+      background: linear-gradient(135deg, #51cf66 0%, #37b24d 100%);
+    }
+    
+    @media (max-width: 600px) {
+      .omikuji-button {
+        padding: 12px 30px;
+        font-size: 16px;
+      }
+      
+      #omikuji-result {
+        padding: 20px;
+      }
+      
+      .fortune-level {
+        font-size: 36px;
+      }
+    }
+  </style>
+  
+  <div id="omikuji-ui">
+    <button id="draw-button" class="omikuji-button">🎋 おみくじを引く</button>
+  </div>
+  
+  <div id="omikuji-result">
+    <div id="fortune-content"></div>
+    <button id="draw-again-button" class="omikuji-button">もう一度引く</button>
+  </div>
+  
   <a-scene id="scene" renderer="logarithmicDepthBuffer: true;" embedded loading-screen="enabled: false;"
     arjs="sourceType: webcam; debugUIEnabled: false;">
     <a-entity id="snakeLeft" gltf-model="https://odagakihiroki.github.io/models/3d/tiny-figurines/snake_cute.glb"
@@ -24,6 +159,48 @@
       position="-8 9 -24"
       rotation="10 0 0"
     ></a-entity>
+    
+    <!-- おみくじ筒 (Omikuji Cylinder) -->
+    <a-entity id="omikuji-container" position="0 3 -20">
+      <!-- 筒本体 -->
+      <a-cylinder 
+        id="omikuji-cylinder" 
+        color="#8B4513" 
+        radius="1.5" 
+        height="4"
+        position="0 0 0"
+        rotation="0 0 0"
+        animation__idle="property: rotation; to: 0 0 5; dur: 2000; dir: alternate; loop: true; easing: easeInOutSine"
+      >
+        <!-- 筒の上部装飾 -->
+        <a-ring color="#D2691E" radius-inner="1.5" radius-outer="1.8" position="0 2.1 0" rotation="90 0 0"></a-ring>
+        <a-ring color="#D2691E" radius-inner="1.5" radius-outer="1.8" position="0 -2.1 0" rotation="90 0 0"></a-ring>
+      </a-cylinder>
+      
+      <!-- おみくじ棒 -->
+      <a-cylinder 
+        id="omikuji-stick" 
+        color="#F5DEB3" 
+        radius="0.1" 
+        height="3"
+        position="0 0.5 0"
+        rotation="0 0 0"
+        visible="false"
+      ></a-cylinder>
+      
+      <!-- おみくじ紙 -->
+      <a-plane 
+        id="omikuji-paper" 
+        color="#FFFACD" 
+        width="2" 
+        height="3"
+        position="0 1 0"
+        rotation="0 0 0"
+        visible="false"
+      >
+        <a-text value="おみくじ" color="#8B4513" align="center" position="0 0.5 0.01" width="3"></a-text>
+      </a-plane>
+    </a-entity>
     <a-entity class="firework" position="0 0 0">
       <a-entity class="firework-tail-wrapper" position="0 14 0">
         <a-cylinder
@@ -149,6 +326,251 @@
     setTimeout(() => {
       generateFirework(fireworkTemplate)
     }, 2600);
+
+    // ========================================
+    // おみくじシステム (Omikuji System)
+    // ========================================
+    
+    // おみくじのデータ定義
+    const fortuneLevels = {
+      daikichi: {
+        name: '大吉',
+        className: 'daikichi',
+        messages: [
+          '素晴らしい一年になるでしょう。自信を持って前進してください！',
+          '最高の運気です。新しいことに挑戦する絶好の機会です。',
+          '幸運の波があなたを後押ししています。思い切って行動しましょう！'
+        ]
+      },
+      kichi: {
+        name: '吉',
+        className: 'kichi',
+        messages: [
+          '良いことが待っています。焦らず着実に進みましょう。',
+          '順調な一年になります。感謝の気持ちを忘れずに。',
+          '幸せが訪れます。周りの人を大切にしてください。'
+        ]
+      },
+      chukichi: {
+        name: '中吉',
+        className: 'chukichi',
+        messages: [
+          'バランスの良い一年です。堅実に歩んでいきましょう。',
+          '安定した運気です。計画的に物事を進めると良いでしょう。',
+          '努力が実を結びます。諦めずに続けることが大切です。'
+        ]
+      },
+      shokichi: {
+        name: '小吉',
+        className: 'shokichi',
+        messages: [
+          '小さな幸せを大切に。日々の感謝が開運の鍵です。',
+          '穏やかな一年になります。焦らず自分のペースで。',
+          '着実な成長が期待できます。基礎を固めましょう。'
+        ]
+      },
+      suekichi: {
+        name: '末吉',
+        className: 'suekichi',
+        messages: [
+          '後半に運気が上昇します。準備を怠らずに。',
+          '辛抱強さが報われます。諦めないことが大切です。',
+          'じっくりと時間をかけて。良い結果は後からついてきます。'
+        ]
+      },
+      kyo: {
+        name: '凶',
+        className: 'kyo',
+        messages: [
+          '試練の時ですが、これを乗り越えれば大きく成長できます。',
+          '困難に立ち向かう力を養いましょう。助けを求めることも大切です。',
+          '今は耐える時期です。必ず道は開けます。希望を持ち続けて。'
+        ]
+      }
+    };
+    
+    // 運勢を生成する関数
+    function generateFortune() {
+      const levels = Object.keys(fortuneLevels);
+      const selectedLevel = levels[Math.floor(Math.random() * levels.length)];
+      const level = fortuneLevels[selectedLevel];
+      const message = level.messages[Math.floor(Math.random() * level.messages.length)];
+      
+      // ランダムな星評価を生成（1-5）
+      const generateStars = () => Math.floor(Math.random() * 5) + 1;
+      
+      // ラッキーカラーの選択肢
+      const colors = ['赤', '青', '黄', '緑', '紫', '橙', 'ピンク', '白', '金', '銀'];
+      const luckyColor = colors[Math.floor(Math.random() * colors.length)];
+      
+      // ラッキーナンバー（1-99）
+      const luckyNumber = Math.floor(Math.random() * 99) + 1;
+      
+      return {
+        level: level.name,
+        className: level.className,
+        message: message,
+        love: generateStars(),
+        money: generateStars(),
+        health: generateStars(),
+        work: generateStars(),
+        luckyColor: luckyColor,
+        luckyNumber: luckyNumber
+      };
+    }
+    
+    // 星を表示する関数
+    function renderStars(count) {
+      return '★'.repeat(count) + '☆'.repeat(5 - count);
+    }
+    
+    // おみくじ結果を表示する関数
+    function displayFortune(fortune) {
+      const content = document.getElementById('fortune-content');
+      content.innerHTML = `
+        <div class="fortune-level ${fortune.className}">${fortune.level}</div>
+        
+        <div class="fortune-category">
+          <div class="fortune-category-title">💕 恋愛運</div>
+          <div class="stars">${renderStars(fortune.love)}</div>
+        </div>
+        
+        <div class="fortune-category">
+          <div class="fortune-category-title">💰 金運</div>
+          <div class="stars">${renderStars(fortune.money)}</div>
+        </div>
+        
+        <div class="fortune-category">
+          <div class="fortune-category-title">❤️ 健康運</div>
+          <div class="stars">${renderStars(fortune.health)}</div>
+        </div>
+        
+        <div class="fortune-category">
+          <div class="fortune-category-title">💼 仕事運</div>
+          <div class="stars">${renderStars(fortune.work)}</div>
+        </div>
+        
+        <div class="fortune-category">
+          <div class="fortune-category-title">🎨 ラッキーカラー</div>
+          <div style="font-size: 18px; color: #495057;">${fortune.luckyColor}</div>
+        </div>
+        
+        <div class="fortune-category">
+          <div class="fortune-category-title">🔢 ラッキーナンバー</div>
+          <div style="font-size: 24px; font-weight: bold; color: #495057;">${fortune.luckyNumber}</div>
+        </div>
+        
+        <div class="fortune-message">
+          <strong>今年のメッセージ：</strong><br>
+          ${fortune.message}
+        </div>
+      `;
+      
+      const resultPanel = document.getElementById('omikuji-result');
+      resultPanel.classList.add('show');
+    }
+    
+    // おみくじアニメーション
+    function animateOmikuji() {
+      const cylinder = document.getElementById('omikuji-cylinder');
+      const stick = document.getElementById('omikuji-stick');
+      const paper = document.getElementById('omikuji-paper');
+      
+      // ステップ1: 筒が傾く
+      cylinder.setAttribute('animation__tilt', {
+        property: 'rotation',
+        to: '0 0 -45',
+        dur: 1000,
+        easing: 'easeInOutQuad'
+      });
+      
+      // ステップ2: 棒が飛び出す（1秒後）
+      setTimeout(() => {
+        stick.setAttribute('visible', 'true');
+        stick.setAttribute('animation__fly', {
+          property: 'position',
+          to: '2 4 0',
+          dur: 800,
+          easing: 'easeOutQuad'
+        });
+        stick.setAttribute('animation__rotate', {
+          property: 'rotation',
+          to: '0 0 90',
+          dur: 800,
+          easing: 'easeOutQuad'
+        });
+      }, 1000);
+      
+      // ステップ3: 紙が展開される（2秒後）
+      setTimeout(() => {
+        paper.setAttribute('visible', 'true');
+        paper.setAttribute('position', '0 -2 0');
+        paper.setAttribute('scale', '0.1 0.1 1');
+        paper.setAttribute('animation__unfold', {
+          property: 'scale',
+          to: '1 1 1',
+          dur: 1000,
+          easing: 'easeOutBack'
+        });
+        paper.setAttribute('animation__move', {
+          property: 'position',
+          to: '0 1 2',
+          dur: 1000,
+          easing: 'easeOutQuad'
+        });
+      }, 2000);
+      
+      // ステップ4: 結果を表示（3.5秒後）
+      setTimeout(() => {
+        const fortune = generateFortune();
+        displayFortune(fortune);
+      }, 3500);
+    }
+    
+    // アニメーションをリセット
+    function resetOmikuji() {
+      const cylinder = document.getElementById('omikuji-cylinder');
+      const stick = document.getElementById('omikuji-stick');
+      const paper = document.getElementById('omikuji-paper');
+      
+      cylinder.removeAttribute('animation__tilt');
+      cylinder.setAttribute('rotation', '0 0 0');
+      
+      stick.removeAttribute('animation__fly');
+      stick.removeAttribute('animation__rotate');
+      stick.setAttribute('visible', 'false');
+      stick.setAttribute('position', '0 0.5 0');
+      stick.setAttribute('rotation', '0 0 0');
+      
+      paper.removeAttribute('animation__unfold');
+      paper.removeAttribute('animation__move');
+      paper.setAttribute('visible', 'false');
+      paper.setAttribute('position', '0 1 0');
+      paper.setAttribute('scale', '1 1 1');
+      
+      const resultPanel = document.getElementById('omikuji-result');
+      resultPanel.classList.remove('show');
+    }
+    
+    // イベントリスナー設定
+    const drawButton = document.getElementById('draw-button');
+    const drawAgainButton = document.getElementById('draw-again-button');
+    
+    drawButton.addEventListener('click', () => {
+      drawButton.disabled = true;
+      animateOmikuji();
+      
+      // アニメーション完了後にボタンを無効化したまま
+      setTimeout(() => {
+        drawButton.style.display = 'none';
+      }, 3500);
+    });
+    
+    drawAgainButton.addEventListener('click', () => {
+      resetOmikuji();
+      drawButton.disabled = false;
+      drawButton.style.display = 'block';
+    });
   </script>
 </body>
 
